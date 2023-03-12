@@ -1,0 +1,190 @@
+
+
+Microchip MPLAB XC8 Assembler V2.32 build 20210201212658 
+                                                                                                           Thu Nov 18 16:33:12 2021
+
+
+     1                           	processor	18F4520
+     2                           	pagewidth 132
+     3                           	opt	flic
+     4                           	psect	udata_acs,global,class=COMRAM,space=1,delta=1,lowdata,noexec
+     5                           	psect	udata_bank0,global,class=BANK0,space=1,delta=1,lowdata,noexec
+     6                           	psect	udata_bank1,global,class=BANK1,space=1,delta=1,lowdata,noexec
+     7                           	psect	udata_bank2,global,class=BANK2,space=1,delta=1,lowdata,noexec
+     8                           	psect	udata_bank3,global,class=BANK3,space=1,delta=1,lowdata,noexec
+     9                           	psect	udata_bank4,global,class=BANK4,space=1,delta=1,lowdata,noexec
+    10                           	psect	udata_bank5,global,class=BANK5,space=1,delta=1,lowdata,noexec
+    11                           	psect	udata,global,class=RAM,space=1,delta=1,noexec
+    12                           	psect	code,global,reloc=2,class=CODE,delta=1
+    13                           	psect	data,global,reloc=2,class=CONST,delta=1,noexec
+    14                           	psect	edata,global,class=EEDATA,space=3,delta=2,noexec
+    15                           	psect	mytext,local,reloc=2,class=CODE,delta=1
+    16  0000                     
+    17                           	psect	edata
+    18  0000                     stk_offset	set	0
+    19  0000                     auto_size	set	0
+    20                           
+    21                           ; stack_auto defines a symbol /name/_offset which equates to the
+    22                           ; stack offset of the auto object in question
+    23  000000                     
+    24                           ; stack_param defines a symbol /name/_offset which equates to the
+    25                           ; stack offset of the parameter object in question
+    26  000000                     
+    27                           ; alloc_stack adjusts the SP to allocate space for auto objects
+    28                           ; it also links in to the btemp symbol so that can be used
+    29  000000                     
+    30                           ; restore_stack adjusts the SP to remove all auto and parameter
+    31                           ; objects from the stack prior to returning from a function
+    32  000000                     
+    33                           	psect	mytext
+    34  007F78                     _divide_signed:
+    35                           	callstack 0
+    36  007F78  C001 F003          	movff	1,3	;divisor move to 0x03 from 0x01
+    37  007F7C  6E01               	movwf	1,c	;dividend move to 0x01 from WREG
+    38                           
+    39                           ; pre_process
+    40  007F7E  6A96               	clrf	3990,c	;TRISE used to record if the original data > 0
+    41  007F80  AE01               	btfss	1,7,c	;if 0x01<7> == 1, skip (dividend)
+    42  007F82  D003               	goto	NEXT	;0x01 > 0
+    43  007F84  8296               	bsf	3990,1,c	;0x01 < 0
+    44  007F86  0601               	decf	1,f,c
+    45  007F88  1E01               	comf	1,f,c	;complement
+    46  007F8A                     NEXT:
+    47  007F8A  AE03               	btfss	3,7,c	;if 0x03<7> == 1 skip (divisor)
+    48  007F8C  D003               	goto	NEXT2	;0x03 > 0
+    49  007F8E  8096               	bsf	3990,0,c	;0x03 < 0
+    50  007F90  0603               	decf	3,f,c
+    51  007F92  1E03               	comf	3,f,c
+    52  007F94                     NEXT2:
+    53                           
+    54                           ;divisor
+    55  007F94  0E08               	movlw	8
+    56  007F96  6E92               	movwf	3986,c	; loop
+    57  007F98  C001 FF95          	movff	1,3989	; dividend
+    58  007F9C  C003 FF94          	movff	3,3988	; divisor
+    59  007FA0  6A93               	clrf	3987,c
+    60                           
+    61                           ;remainder = TRISB:TRISD
+    62  007FA2  6AE8               	clrf	wreg,c
+    63                           
+    64                           ;step 1 shift remainder left 1 bit
+    65  007FA4  BE95               	btfsc	3989,7,c	; check if TRISD<7> == 0? set TRISB<0> = 0 : set TRISB<0> = 1
+    66  007FA6  8093               	bsf	3987,0,c
+    67  007FA8  9E95               	bcf	3989,7,c	; rotate TRISD left 1 bit
+    68  007FAA  4695               	rlncf	3989,f,c
+    69  007FAC                     LOOP:
+    70                           
+    71                           ;step2 let TRISB - TRISC (left of remainder) - divisor
+    72  007FAC  CF94 FFE8          	movff	3988,wreg
+    73  007FB0  5C93               	subwf	3987,w,c
+    74                           
+    75                           ;test if the answer < 0 if yes, jump to "remainder_small"
+    76  007FB2  E609               	bmi	REMAINDER_SMALL
+    77                           
+    78                           ; step 3a : remainder >= 0
+    79  007FB4  6E93               	movwf	3987,c
+    80  007FB6  9E93               	bcf	3987,7,c	; clear TRISB<7>
+    81  007FB8  4693               	rlncf	3987,f,c	; rotate
+    82  007FBA  BE95               	btfsc	3989,7,c	;check if TRISD<7> = 0? if no , TRISB<0> = 1
+    83  007FBC  8093               	bsf	3987,0,c	;
+    84                           
+    85                           ;rotate
+    86  007FBE  9E95               	bcf	3989,7,c
+    87  007FC0  4695               	rlncf	3989,f,c
+    88  007FC2  8095               	bsf	3989,0,c
+    89  007FC4  D006               	goto	L1
+    90  007FC6                     REMAINDER_SMALL:
+    91                           
+    92                           ; step 3b :remainder < 0
+    93  007FC6  9E93               	bcf	3987,7,c	;rotate
+    94  007FC8  4693               	rlncf	3987,f,c
+    95  007FCA  BE95               	btfsc	3989,7,c	;check TRISD<7> = 0? if no,TRISB<0> = 1
+    96  007FCC  8093               	bsf	3987,0,c
+    97                           
+    98                           ;rotate TRISD
+    99  007FCE  4695               	rlncf	3989,f,c
+   100  007FD0  9095               	bcf	3989,0,c
+   101  007FD2                     L1:
+   102                           
+   103                           ;repeat?
+   104  007FD2  2E92               	decfsz	3986,f,c
+   105  007FD4  D7EB               	goto	LOOP
+   106                           
+   107                           ;rotate right
+   108  007FD6  9093               	bcf	3987,0,c
+   109  007FD8  4293               	rrncf	3987,f,c
+   110                           
+   111                           ;move answer
+   112  007FDA  CF93 F001          	movff	3987,1
+   113  007FDE  CF95 F002          	movff	3989,2
+   114                           
+   115                           ;post_process check if divisor and dividend are negative, :
+   116                           ; dividend : divisor process one by one
+   117                           ;test dividend first
+   118  007FE2  A296               	btfss	3990,1,c	; skip if clear
+   119  007FE4  D003               	goto	DIVIDEND_POS
+   120  007FE6  A096               	btfss	3990,0,c	;skip if clear
+   121  007FE8  D004               	goto	NEG_POS	;-+
+   122  007FEA  D006               	goto	NEG_NEG	; --
+   123  007FEC                     DIVIDEND_POS:
+   124  007FEC  A096               	btfss	3990,0,c	; skip if clear
+   125  007FEE  0012               	return		;+ +
+   126  007FF0  D005               	goto	POS_NEG	;+ -
+   127  007FF2                     NEG_POS:
+   128  007FF2  6C01               	negf	1,c
+   129  007FF4  6C02               	negf	2,c
+   130  007FF6  0012               	return	
+   131  007FF8                     NEG_NEG:
+   132  007FF8  6C01               	negf	1,c
+   133  007FFA  0012               	return	
+   134  007FFC                     POS_NEG:
+   135  007FFC  6C02               	negf	2,c
+   136  007FFE  0012               	return	
+   137                           tosu	equ	0xFFF
+   138                           tosh	equ	0xFFE
+   139                           tosl	equ	0xFFD
+   140                           stkptr	equ	0xFFC
+   141                           pclatu	equ	0xFFB
+   142                           pclath	equ	0xFFA
+   143                           pcl	equ	0xFF9
+   144                           tblptru	equ	0xFF8
+   145                           tblptrh	equ	0xFF7
+   146                           tblptrl	equ	0xFF6
+   147                           tablat	equ	0xFF5
+   148                           prodh	equ	0xFF4
+   149                           prodl	equ	0xFF3
+   150                           indf0	equ	0xFEF
+   151                           postinc0	equ	0xFEE
+   152                           postdec0	equ	0xFED
+   153                           preinc0	equ	0xFEC
+   154                           plusw0	equ	0xFEB
+   155                           fsr0h	equ	0xFEA
+   156                           fsr0l	equ	0xFE9
+   157                           wreg	equ	0xFE8
+   158                           indf1	equ	0xFE7
+   159                           postinc1	equ	0xFE6
+   160                           postdec1	equ	0xFE5
+   161                           preinc1	equ	0xFE4
+   162                           plusw1	equ	0xFE3
+   163                           fsr1h	equ	0xFE2
+   164                           fsr1l	equ	0xFE1
+   165                           bsr	equ	0xFE0
+   166                           indf2	equ	0xFDF
+   167                           postinc2	equ	0xFDE
+   168                           postdec2	equ	0xFDD
+   169                           preinc2	equ	0xFDC
+   170                           plusw2	equ	0xFDB
+   171                           fsr2h	equ	0xFDA
+   172                           fsr2l	equ	0xFD9
+   173                           status	equ	0xFD8
+
+
+Microchip Technology PIC18 Macro Assembler V2.32 build 20210201212658 
+Symbol Table                                                                                               Thu Nov 18 16:33:12 2021
+
+                        NEXT 7F8A                          LOOP 7FAC                          WREG 000FE8  
+                       NEXT2 7F94                         TRISA 000F92                         TRISB 000F93  
+                       TRISC 000F94                         TRISD 000F95                         TRISE 000F96  
+                     NEG_NEG 7FF8                       NEG_POS 7FF2                       POS_NEG 7FFC  
+                     isa$std 000001               REMAINDER_SMALL 7FC6                     isa$xinst 000000  
+                DIVIDEND_POS 7FEC                _divide_signed 7F78  

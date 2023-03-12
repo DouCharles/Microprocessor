@@ -1,0 +1,3 @@
+Warning[205] D:\NCKU\THIRD_UP\MICROPROCESSOR_LAB\LAB1.X\LAB4_1.ASM 1 : Found directive in column 1. (LIST)
+Warning[207] D:\NCKU\THIRD_UP\MICROPROCESSOR_LAB\LAB1.X\LAB4_1.ASM 8 : Found label after column 1. (MOVLF)
+Warning[207] D:\NCKU\THIRD_UP\MICROPROCESSOR_LAB\LAB1.X\LAB4_1.ASM 13 : Found label after column 1. (RECT)

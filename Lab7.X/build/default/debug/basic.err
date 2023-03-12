@@ -1,0 +1,6 @@
+Warning[205] D:\NCKU\THIRD_UP\MICROPROCESSOR_LAB\LAB7.X\BASIC.ASM 1 : Found directive in column 1. (LIST)
+Warning[207] D:\NCKU\THIRD_UP\MICROPROCESSOR_LAB\LAB7.X\BASIC.ASM 64 : Found label after column 1. (L1)
+Warning[207] D:\NCKU\THIRD_UP\MICROPROCESSOR_LAB\LAB7.X\BASIC.ASM 65 : Found label after column 1. (L2)
+Warning[207] D:\NCKU\THIRD_UP\MICROPROCESSOR_LAB\LAB7.X\BASIC.ASM 70 : Found label after column 1. (delay)
+Warning[207] D:\NCKU\THIRD_UP\MICROPROCESSOR_LAB\LAB7.X\BASIC.ASM 75 : Found label after column 1. (LOOP2)
+Warning[207] D:\NCKU\THIRD_UP\MICROPROCESSOR_LAB\LAB7.X\BASIC.ASM 78 : Found label after column 1. (LOOP1)

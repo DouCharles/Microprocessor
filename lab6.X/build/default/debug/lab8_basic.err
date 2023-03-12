@@ -1,0 +1,6 @@
+Warning[205] D:\NCKU\THIRD_UP\MICROPROCESSOR_LAB\LAB6.X\LAB8_BASIC.ASM 1 : Found directive in column 1. (LIST)
+Warning[205] D:\NCKU\THIRD_UP\MICROPROCESSOR_LAB\LAB6.X\LAB8_BASIC.ASM 60 : Found directive in column 1. (org)
+Warning[203] D:\NCKU\THIRD_UP\MICROPROCESSOR_LAB\LAB6.X\LAB8_BASIC.ASM 61 : Found opcode in column 1. (bra)
+Warning[205] D:\NCKU\THIRD_UP\MICROPROCESSOR_LAB\LAB6.X\LAB8_BASIC.ASM 63 : Found directive in column 1. (org)
+Warning[203] D:\NCKU\THIRD_UP\MICROPROCESSOR_LAB\LAB6.X\LAB8_BASIC.ASM 64 : Found opcode in column 1. (bra)
+Warning[205] D:\NCKU\THIRD_UP\MICROPROCESSOR_LAB\LAB6.X\LAB8_BASIC.ASM 118 : Found directive in column 1. (end)
